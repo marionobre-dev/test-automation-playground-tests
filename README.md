@@ -1,5 +1,7 @@
 # Test Automation Playground: Playwright Suite
 
+[![Playwright tests](https://github.com/marionobre-dev/test-automation-playground-tests/actions/workflows/tests.yml/badge.svg)](https://github.com/marionobre-dev/test-automation-playground-tests/actions/workflows/tests.yml)
+
 End-to-end UI and API tests for [Mario's Test Automation Playground](https://testautomation.marionobre.com/), written in TypeScript with [Playwright](https://playwright.dev/).
 
 The app lives in its own repository ([test-automation-playground](https://github.com/marionobre-dev/test-automation-playground)). This suite tests it from the outside, the way a QA team tests a deployed environment.
@@ -37,6 +39,17 @@ $env:BASE_URL = "http://localhost:8080"; npm run test:ui
 ### API sandboxes
 
 Every run sends an `X-Sandbox-Id` header (`pw-<run id>`), so it gets a private copy of the API data, and the tests reset it before starting. Set `SANDBOX_ID` to reuse a specific sandbox.
+
+## Continuous integration
+
+[`.github/workflows/tests.yml`](.github/workflows/tests.yml) runs the whole suite against the live site:
+
+- every day at 06:00 UTC, to catch regressions in the deployed app;
+- on every push to `main` and on pull requests;
+- when the app repo sends an `app-deployed` repository dispatch after a deploy;
+- by hand from the Actions tab (*Run workflow*), optionally against another `base_url`.
+
+On CI, failed tests are retried twice and the HTML report is uploaded as the `playwright-report` artifact (kept 14 days). GitHub turns off scheduled workflows in public repos after 60 days without a commit, so each scheduled run also re-enables the workflow to keep the daily run alive.
 
 ## Structure
 
