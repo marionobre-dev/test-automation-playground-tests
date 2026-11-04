@@ -1,0 +1,45 @@
+name: Playwright tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Run against the live site every morning to catch regressions in the app.
+  schedule:
+    - cron: '0 6 * * *'
+  # Lets the app repo trigger a run after it deploys
+  # (POST /repos/<owner>/<repo>/dispatches with event_type "app-deployed").
+  repository_dispatch:
+    types: [app-deployed]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Site to test'
+        required: false
+        default: 'https://testautomation.marionobre.com'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BASE_URL: ${{ inputs.base_url || vars.BASE_URL || 'https://testautomation.marionobre.com' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
