@@ -1,10 +1,12 @@
 import { test as base } from '@playwright/test';
+import { DynamicPage } from '../pages/DynamicPage';
 import { FormsPage } from '../pages/FormsPage';
 import { LoginPage } from '../pages/LoginPage';
 import { SecurePage } from '../pages/SecurePage';
 import { TablesPage } from '../pages/TablesPage';
 
 type Pages = {
+  dynamicPage: DynamicPage;
   formsPage: FormsPage;
   loginPage: LoginPage;
   securePage: SecurePage;
@@ -16,6 +18,7 @@ type Pages = {
  *   test('...', async ({ loginPage }) => { ... })
  */
 export const test = base.extend<Pages>({
+  dynamicPage: async ({ page }, use) => use(new DynamicPage(page)),
   formsPage: async ({ page }, use) => use(new FormsPage(page)),
   loginPage: async ({ page }, use) => use(new LoginPage(page)),
   securePage: async ({ page }, use) => use(new SecurePage(page)),
